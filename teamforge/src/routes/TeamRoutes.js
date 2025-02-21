@@ -14,7 +14,8 @@ router.post("/create-team", async (req, res) => {
 
     await newTeam.save();
     
-    res.json({ success: true, link: `http://localhost:5173/mbti/${teamId}` });
+    res.json({ success: true, link: `http://localhost:5000/mbti/${teamId}` });
+
   } catch (error) {
     res.status(500).json({ success: false, message: "Error creating team" });
   }

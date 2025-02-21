@@ -94,6 +94,7 @@ export default function TeamForgeLanding() {
       </section>
 
       {/* Show Generated Link */}
+
       {error && <p className="text-red-500 text-center mt-4">{error}</p>}
       {generatedLink && (
         <div className="text-center mt-6 p-4 bg-gray-800 text-white rounded-lg flex items-center justify-center gap-4">
