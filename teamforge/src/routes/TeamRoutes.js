@@ -1,14 +1,17 @@
 import express from "express";
 import { nanoid } from "nanoid"; // Generates unique IDs
 import Team from "../Models/Team.js";
+// import MBTIResult from "../Models/MBTIResult.js";
 
 const router = express.Router();
 
 router.post("/create-team", async (req, res) => {
   try {
     const teamId = nanoid(8); // Generates an 8-character unique ID
+    const testId='123'
     const newTeam = new Team({
       teamId,
+      testId,
       creator: req.body.creator, // Replace with actual user authentication
     });
 

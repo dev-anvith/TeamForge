@@ -1,17 +1,16 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-
-import TeamForgeLanding from './Landing'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import TeamForgeLanding from "./Landing";
+import ResultPage from "./Result"; // Ensure this path is correct
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-     <TeamForgeLanding></TeamForgeLanding>
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<TeamForgeLanding />} />
+        <Route path="/results/:teamId" element={<ResultPage />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
