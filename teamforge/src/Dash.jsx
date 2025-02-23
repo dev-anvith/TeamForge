@@ -1,92 +1,100 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Button } from "./Button";
 import axios from "axios";
+import { FaUsersCog } from "react-icons/fa";
 
-export default function CreatorDashboard() {
+const BACKEND_URL = "http://localhost:5000";
+
+export default function TeamForgeDashboard() {
   const { teamId } = useParams();
   const [participants, setParticipants] = useState([]);
-  const [teamConfig, setTeamConfig] = useState("balanced");
-  const [teams, setTeams] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    axios.get(`/api/dashboard/${teamId}`).then((res) => {
-      setParticipants(res.data.participants);
-    });
+    const fetchParticipants = async () => {
+      try {
+        const response = await axios.get(`${BACKEND_URL}/participants/${teamId}`);
+        if (response.data.success) {
+          setParticipants(response.data.participants);
+        } else {
+          setError(response.data.message || "No participants found.");
+        }
+      } catch (err) {
+        setError("Failed to fetch participants.");
+      }
+      setLoading(false);
+    };
+    fetchParticipants();
   }, [teamId]);
 
-  const generateTeams = () => {
-    axios.post(`/api/generate-teams/${teamId}`, { config: teamConfig }).then((res) => {
-      setTeams(res.data.teams);
-    });
-  };
-
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">TeamForge - Creator Dashboard</h1>
-      <p className="text-gray-600">Manage and configure teams for <b>Team ID: {teamId}</b></p>
-      
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-2">Participants</h2>
-        <div className="bg-white shadow-md rounded-lg p-4">
-          {participants.length === 0 ? (
-            <p className="text-gray-500">No participants yet.</p>
+    <div className="bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
+      {/* Header */}
+      <header className="text-center py-6">
+        <motion.h1
+          className="text-4xl font-bold"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          Creator Dashboard
+        </motion.h1>
+      </header>
+
+      {/* Main Layout */}
+      <div className="flex w-full max-w-6xl gap-6">
+        {/* Left Side - Participants List */}
+        <div className="w-1/2 bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+            <FaUsersCog /> Participants
+          </h2>
+
+          {loading ? (
+            <p className="text-center text-gray-400">Loading...</p>
+          ) : error ? (
+            <p className="text-center text-red-500">{error}</p>
+          ) : participants.length === 0 ? (
+            <p className="text-center text-gray-400">No Participants</p>
           ) : (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="p-2">Name</th>
-                  <th className="p-2">MBTI Type</th>
-                  <th className="p-2">Age</th>
-                  <th className="p-2">Experience</th>
-                </tr>
-              </thead>
-              <tbody>
-                {participants.map((p) => (
-                  <tr key={p.id} className="border-t">
-                    <td className="p-2">{p.name}</td>
-                    <td className="p-2">{p.mbti}</td>
-                    <td className="p-2">{p.age}</td>
-                    <td className="p-2">{p.experience} years</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <ul className="divide-y divide-gray-700">
+              {participants.map((p, index) => (
+                <li key={index} className="py-2 flex justify-between">
+                  <span>{p.name}</span>
+                  <span className="text-blue-400">{p.mbtiType}</span>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
-      </div>
-      
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold">Team Configuration</h2>
-        <select className="border p-2 rounded-lg mt-2" value={teamConfig} onChange={(e) => setTeamConfig(e.target.value)}>
-          <option value="balanced">Balanced Teams</option>
-          <option value="similar">Similar Personality Teams</option>
-          <option value="random">Random Teams</option>
-        </select>
-      </div>
-      
-      <motion.div whileHover={{ scale: 1.05 }} className="mt-4">
-        <Button onClick={generateTeams} className="bg-blue-500 text-white px-4 py-2 rounded-lg">Generate Teams</Button>
-      </motion.div>
 
-      {teams.length > 0 && (
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold">Generated Teams</h2>
-          <div className="bg-white shadow-md rounded-lg p-4">
-            {teams.map((team, index) => (
-              <div key={index} className="border-b py-2">
-                <h3 className="font-semibold">Team {index + 1}</h3>
-                <ul>
-                  {team.map((member) => (
-                    <li key={member.id} className="text-gray-700">{member.name} ({member.mbti})</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+        {/* Right Side - Team Configuration */}
+        <div className="w-1/2 bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-semibold mb-4">Team Configuration</h2>
+
+          {/* Mode Selection */}
+          <label className="block mb-2 text-gray-300">Mode</label>
+          <select className="w-full p-2 bg-gray-700 rounded-lg text-white">
+            <option>Diverse</option>
+            <option>Like-Minded</option>
+            <option>Random</option>
+          </select>
+
+          {/* Team Size Input */}
+          <label className="block mt-4 mb-2 text-gray-300">Team Size</label>
+          <input
+            type="number"
+            min="1"
+            className="w-full p-2 bg-gray-700 rounded-lg text-white"
+          />
+
+          {/* Generate Teams Button */}
+          <button className="w-full mt-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
+            Generate Teams
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
